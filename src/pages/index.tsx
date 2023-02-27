@@ -4,12 +4,16 @@ import { Inter } from "next/font/google";
 import useGetPlayer from "@/hooks/useGetPlayer";
 import useGetAllGames from "@/hooks/useGetAllGames";
 import { dateToISO } from "@/utils/getDate";
-import { FaFolder } from "react-icons/fa";
+import { FaFolder, FaCaretLeft, FaCaretRight } from "react-icons/fa";
+import { AiOutlineLoading3Quarters } from "react-icons/ai";
+import { useState } from "react";
 const inter = Inter({ subsets: ["latin"] });
 const today = new Date();
 export default function Home() {
   const { playerList } = useGetPlayer();
-  const { gameList } = useGetAllGames(dateToISO(today));
+  const [date, setDate] = useState<Date>(new Date());
+
+  const { gameList, loading } = useGetAllGames(dateToISO(date));
   // console.log(gameList);
   // console.log(playerList);
   return (
@@ -21,21 +25,104 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div className="w-full h-screen">
-        <FaFolder size={84} className="text-sky-300 " />
-        <div className="flex flex-col w-full max-w-md rounded-md overflow-hidden">
+        <FaFolder size={84} className="text-sky-300" />
+        <div className="flex flex-col w-full max-w-md overflow-hidden rounded-md">
           <div className="w-full h-5 bg-gray-200 flex justify-start gap-2 items-center px-1.5">
-            <div className="w-3 h-3 rounded-full bg-red-500"></div>
-            <div className="w-3 h-3 rounded-full bg-green-500"></div>
-            <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+            <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+            <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
           </div>
-          <div className="bg-gray-100">
-            {gameList &&
-              gameList.data.map((game) => (
-                <div key={game.id}>
-                  {game.home_team.abbreviation} vs{" "}
-                  {game.visitor_team.abbreviation}
+          <div className="bg-gray-100 min-h-[400px] flex items-center flex-col p-4">
+            <div className="flex items-center gap-2">
+              <button
+                className="p-2"
+                onClick={() =>
+                  setDate(
+                    new Date(
+                      date.getFullYear(),
+                      date.getMonth(),
+                      date.getDate() - 1
+                    )
+                  )
+                }
+              >
+                <FaCaretLeft />
+              </button>
+              <div>{date.getFullYear()}.</div>
+              <div>{date.getMonth() + 1}.</div>
+              <div>{date.getDate()}.</div>{" "}
+              <button
+                className="p-2"
+                onClick={() =>
+                  setDate(
+                    new Date(
+                      date.getFullYear(),
+                      date.getMonth(),
+                      date.getDate() + 1
+                    )
+                  )
+                }
+              >
+                <FaCaretRight />
+              </button>
+            </div>
+            <div className="flex flex-col items-center justify-center flex-auto w-full gap-2 ">
+              {loading ? (
+                <div>
+                  <AiOutlineLoading3Quarters
+                    className="animate-spin"
+                    size={40}
+                  />
                 </div>
-              ))}
+              ) : (
+                gameList &&
+                gameList.data.map((game) => {
+                  const winner =
+                    game.home_team_score > game.visitor_team_score
+                      ? "home"
+                      : "visitor";
+                  return (
+                    <div
+                      className="flex flex-col gap-0.5 items-center "
+                      key={game.id}
+                    >
+                      {game.status === "Final" ? "" : game.status.slice(0, 8)}
+                      <div className="flex gap-3">
+                        <span className="font-semibold">
+                          {game.home_team.abbreviation}
+                        </span>
+                        {game.status === "Final" && (
+                          <span
+                            className={`font-semibold ${
+                              winner === "home"
+                                ? "text-orange-600"
+                                : "text-gray-400"
+                            }`}
+                          >
+                            {game.home_team_score}
+                          </span>
+                        )}
+                        <span>vs</span>
+                        {game.status === "Final" && (
+                          <span
+                            className={`font-semibold ${
+                              winner === "visitor"
+                                ? "text-orange-600"
+                                : "text-gray-400"
+                            }`}
+                          >
+                            {game.visitor_team_score}
+                          </span>
+                        )}
+                        <span className="font-semibold">
+                          {game.visitor_team.abbreviation}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
           </div>
         </div>
       </div>
