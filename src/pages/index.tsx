@@ -124,6 +124,7 @@ export default function Home() {
               )}
             </div>
           </div>
+      <div className="w-full h-screen overflow-hidden bg-[center_bottom] bg-cover bg-image">
         </div>
       </div>
     </>
