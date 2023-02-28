@@ -1,27 +1,16 @@
 import Head from "next/head";
-import Image from "next/image";
-import { Inter } from "next/font/google";
 import useGetPlayer from "@/hooks/useGetPlayer";
-import useGetAllGames from "@/hooks/useGetAllGames";
-import { dateToISO } from "@/utils/getDate";
-import { FaFolder, FaCaretLeft, FaCaretRight } from "react-icons/fa";
-import { AiOutlineLoading3Quarters } from "react-icons/ai";
-import { useEffect, useState } from "react";
+import { FaFolder } from "react-icons/fa";
+import { useRef, useState } from "react";
 import ScoreApp from "@/components/ScoreApp";
 import Draggable from "react-draggable";
-const inter = Inter({ subsets: ["latin"] });
 import CurrentDate from "@/components/CurrentDate";
 
 export default function Home() {
-  const { playerList } = useGetPlayer();
-
   const [openScore, setOpenScore] = useState(false);
-
   const [position, setPosition] = useState({ x: 0, y: 0 });
-  const trackPos = (data: { x: number; y: number }) => {
-    console.log(data);
+  const trackPos = (data: any) => {
     setPosition((state) => ({ x: data.x, y: data.y }));
-    if (data.x < 0) setPosition((state) => ({ x: 100, y: data.y }));
   };
   const [opacity, setOpacity] = useState(false);
 
@@ -43,7 +32,9 @@ export default function Home() {
       <div className="w-full h-screen overflow-hidden bg-[center_bottom] bg-cover bg-image">
         <CurrentDate />
         <Draggable
-          defaultPosition={{ x: 20, y: 20 }}
+          bounds="parent"
+          positionOffset={{ x: 30, y: 30 }}
+          position={position}
           onDrag={(e, data) => trackPos(data)}
           onStart={handleStart}
           onStop={handleEnd}
